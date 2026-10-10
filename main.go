@@ -26,6 +26,7 @@ func main() {
 	}
 
 	for _, binary := range binaries {
-		fmt.Printf("%+v\n", binary)
+		binary.Print()
+		fmt.Print("\n")
 	}
 }
