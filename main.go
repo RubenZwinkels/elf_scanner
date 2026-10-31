@@ -27,6 +27,10 @@ func main() {
 
 	for _, binary := range binaries {
 		binary.Print()
-		fmt.Print("\n")
+
+		score := ClassifyELF(binary)
+		score.Print()
+
+		fmt.Println()
 	}
 }
