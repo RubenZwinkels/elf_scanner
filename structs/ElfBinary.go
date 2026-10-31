@@ -4,9 +4,10 @@ import "fmt"
 
 // ELFBinary houdt de verzamelde info bij van één ELF-bestand.
 type ELFBinary struct {
-	Path string
-	Name string
-	Size int64
+	Path   string
+	Name   string
+	Size   int64
+	SHA256 string
 
 	FileMode   string
 	ModifiedAt string
@@ -85,6 +86,7 @@ func (binary ELFBinary) Print() {
 	fmt.Printf("File: %s\n", binary.Name)
 	fmt.Printf("  Path: %s\n", binary.Path)
 	fmt.Printf("  Size: %d bytes\n", binary.Size)
+	fmt.Printf("  SHA256: %s\n", binary.SHA256)
 	fmt.Printf("  Mode: %s\n", binary.FileMode)
 	fmt.Printf("  Modified: %s\n", binary.ModifiedAt)
 

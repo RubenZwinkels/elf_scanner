@@ -1,7 +1,11 @@
 package main
 
+
 import (
+	"crypto/sha256"
 	"debug/elf"
+	"encoding/hex"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -62,6 +66,11 @@ func fileToELFBinary(path string) (structs.ELFBinary, error) {
 		return structs.ELFBinary{}, err
 	}
 
+	sha256Hash, err := calculateSHA256(path)
+	if err != nil {
+		return structs.ELFBinary{}, err
+	}
+
 	elfFile, err := elf.Open(path)
 	if err != nil {
 		return structs.ELFBinary{}, err
@@ -74,9 +83,10 @@ func fileToELFBinary(path string) (structs.ELFBinary, error) {
 	importedLibraries, _ := elfFile.ImportedLibraries()
 
 	binary := structs.ELFBinary{
-		Path: path,
-		Name: info.Name(),
-		Size: info.Size(),
+		Path:   path,
+		Name:   info.Name(),
+		Size:   info.Size(),
+		SHA256: sha256Hash,
 
 		FileMode:   info.Mode().String(),
 		ModifiedAt: info.ModTime().Format("2006-01-02 15:04:05"),
@@ -105,6 +115,21 @@ func fileToELFBinary(path string) (structs.ELFBinary, error) {
 	}
 
 	return binary, nil
+}
+
+func calculateSHA256(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
 func mapSections(sections []*elf.Section) []structs.ELFSection {
