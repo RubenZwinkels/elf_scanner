@@ -1,6 +1,8 @@
 package structs
 
 import "fmt"
+
+// HeuristicID is een vaste identifier voor een malware-heuristiek.
 type HeuristicID string
 
 const (
@@ -16,158 +18,43 @@ const (
 	HeuristicSuspiciousSyscalls    HeuristicID = "suspicious_syscalls"
 )
 
-// ELFScore houdt alle heuristiek-scores bij voor één ELF-bestand.
-type ELFScore struct {
+// ELFHeuristicResults verzamelt ongewogen metingen voor één ELF-bestand.
+type ELFHeuristicResults struct {
 	FileSHA256 string
 	Path       string
 	Name       string
-
 	Heuristics []ELFHeuristicScore
 }
 
-// ELFHeuristicScore houdt de score en onderbouwing van één heuristiek bij.
+// ELFHeuristicScore bevat de ruwe score van één heuristiek, zonder gewicht.
 type ELFHeuristicScore struct {
-	ID          HeuristicID
-	Name        string
-	Reliability string
-	// MaxScore is de maximale score die deze heuristiek kan bijdragen.
-	MaxScore int
-	// Score is de daadwerkelijk toegekende score voor deze heuristiek.
-	Score int
-
-	// Triggered geeft aan of deze heuristiek iets verdachts heeft gevonden.
+	ID        HeuristicID
+	Name      string
+	Score     float64
+	Unit      string
+	Evaluated bool
 	Triggered bool
-
-	// Evidence bevat korte redenen of gemeten waarden, bijvoorbeeld:
-	// "section .text entropy=7.91" of "import count=0".
-	Evidence []string
+	Evidence  []string
 }
 
-// NewELFScore maakt een lege score-container met alle bekende heuristieken.
-// De echte score-logica wordt later per heuristiek ingevuld.
-func NewELFScore(binary ELFBinary) ELFScore {
-	return ELFScore{
-		FileSHA256: binary.SHA256,
-		Path:       binary.Path,
-		Name:       binary.Name,
-		Heuristics: DefaultHeuristics(),
-	}
-}
-
-// DefaultHeuristics geeft alle heuristieken terug met hun vaste metadata en max scores.
-func DefaultHeuristics() []ELFHeuristicScore {
-	return []ELFHeuristicScore{
-		{
-			ID:          HeuristicHighEntropy,
-			Name:        "High section or segment entropy",
-			Reliability: "Medium",
-			MaxScore:    4,
-		},
-		{
-			ID:          HeuristicFewImports,
-			Name:        "Zero or very few imported functions",
-			Reliability: "Medium-high",
-			MaxScore:    6,
-		},
-		{
-			ID:          HeuristicUnusualSectionCount,
-			Name:        "Unusual number of sections",
-			Reliability: "Low-medium",
-			MaxScore:    3,
-		},
-		{
-			ID:          HeuristicUnusualSectionSize,
-			Name:        "Unusual section or segment size",
-			Reliability: "Medium",
-			MaxScore:    4,
-		},
-		{
-			ID:          HeuristicSuspiciousPermissions,
-			Name:        "Suspicious section or segment permissions",
-			Reliability: "Medium-high",
-			MaxScore:    6,
-		},
-		{
-			ID:          HeuristicStrippedSymbols,
-			Name:        "Stripped symbols",
-			Reliability: "Low",
-			MaxScore:    2,
-		},
-		{
-			ID:          HeuristicMalformedHeader,
-			Name:        "Missing or manipulated ELF header information",
-			Reliability: "High",
-			MaxScore:    7,
-		},
-		{
-			ID:          HeuristicArchitectureOutlier,
-			Name:        "Architecture-specific outlier behavior",
-			Reliability: "Medium",
-			MaxScore:    5,
-		},
-		{
-			ID:          HeuristicSuspiciousStrings,
-			Name:        "Suspicious dynamic strings",
-			Reliability: "Medium",
-			MaxScore:    4,
-		},
-		{
-			ID:          HeuristicSuspiciousSyscalls,
-			Name:        "Suspicious statically identified syscalls",
-			Reliability: "Medium-high",
-			MaxScore:    6,
-		},
-	}
-}
-
-// TotalScore telt de toegekende punten van alle heuristieken op.
-func (score ELFScore) TotalScore() int {
-	total := 0
-	for _, heuristic := range score.Heuristics {
-		total += heuristic.Score
-	}
-
-	return total
-}
-
-// MaxScore telt de maximale mogelijke punten van alle heuristieken op.
-func (score ELFScore) MaxScore() int {
-	total := 0
-	for _, heuristic := range score.Heuristics {
-		total += heuristic.MaxScore
-	}
-
-	return total
-}
-
-// Print toont de heuristic score op een observeerbare manier.
-func (score ELFScore) Print() {
-	fmt.Println("  Heuristic scores:")
-	fmt.Printf("    File: %s\n", score.Name)
-	fmt.Printf("    SHA256: %s\n", score.FileSHA256)
-	fmt.Printf("    Total score: %d/%d\n", score.TotalScore(), score.MaxScore())
-
-	for _, heuristic := range score.Heuristics {
+// Print toont alle heuristieken zonder totaalscore of classificatie.
+func (results ELFHeuristicResults) Print() {
+	fmt.Println("  Heuristic results:")
+	fmt.Printf("    File: %s\n", results.Name)
+	fmt.Printf("    SHA256: %s\n", results.FileSHA256)
+	for _, heuristic := range results.Heuristics {
 		heuristic.Print()
 	}
 }
 
-// Print toont één heuristiek inclusief score en evidence.
+// Print toont de ruwe score en onderbouwing van één heuristiek.
 func (heuristic ELFHeuristicScore) Print() {
-	status := "not triggered"
-	if heuristic.Triggered {
-		status = "triggered"
+	if !heuristic.Evaluated {
+		fmt.Printf("    - [%s] %s: not evaluated\n", heuristic.ID, heuristic.Name)
+		return
 	}
-
-	fmt.Printf("    - [%s] %s: %d/%d (%s, reliability=%s)\n",
-		heuristic.ID,
-		heuristic.Name,
-		heuristic.Score,
-		heuristic.MaxScore,
-		status,
-		heuristic.Reliability,
-	)
-
+	fmt.Printf("    - [%s] %s: %.3f %s (triggered=%t)\n",
+		heuristic.ID, heuristic.Name, heuristic.Score, heuristic.Unit, heuristic.Triggered)
 	for _, evidence := range heuristic.Evidence {
 		fmt.Printf("        evidence: %s\n", evidence)
 	}

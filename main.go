@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"rzwinkels/elf_scanner/heuristics"
 	"rzwinkels/elf_scanner/utils"
 )
 
@@ -28,8 +29,12 @@ func main() {
 	for _, binary := range binaries {
 		binary.Print()
 
-		score := ClassifyELF(binary)
-		score.Print()
+		results, err := heuristics.EvaluateELFHeuristics(binary)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to evaluate heuristics for %s: %v\n", binary.Path, err)
+			continue
+		}
+		results.Print()
 
 		fmt.Println()
 	}
