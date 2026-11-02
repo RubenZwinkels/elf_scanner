@@ -6,7 +6,7 @@ Scans ands scores ELF's on a posibility of being malware.
 - [x] High section or segment entropy
 - [x] Imported symbol count (measured; no threshold yet)
 - [x] Section count (measured; no threshold yet)
-- [ ] Unusual section or segment size
+- [x] Unusual section or segment size
 - [ ] Suspicious section or segment permissions
 - [x] Stripped symbols
 - [ ] Missing or manipulated ELF header information

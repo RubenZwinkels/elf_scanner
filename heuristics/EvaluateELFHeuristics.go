@@ -7,6 +7,7 @@ import "rzwinkels/elf_scanner/structs"
 func EvaluateELFHeuristics(binary structs.ELFBinary) (structs.ELFHeuristicResults, error) {
 	results := newELFHeuristicResults(binary)
 	applyDirectMeasurements(binary, &results)
+	applySectionAndSegmentSizes(binary, &results)
 
 	if err := applyHighEntropyHeuristic(binary, &results); err != nil {
 		return results, err
