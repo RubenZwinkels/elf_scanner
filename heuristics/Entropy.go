@@ -11,11 +11,12 @@ import (
 )
 
 const (
-	highEntropyThreshold = 7.5
+	highEntropyThreshold  = 7.5
 	minEntropySectionSize = 4096
+	minEntropySegmentSize = 4096
 )
 
-// applyHighEntropyHeuristic meet zelf de ruwe section-bytes; de ELF struct blijft metadata.
+// applyHighEntropyHeuristic meet section- en segmentbytes; de ELF struct blijft metadata.
 func applyHighEntropyHeuristic(binary structs.ELFBinary, results *structs.ELFHeuristicResults) error {
 	file, err := os.Open(binary.Path)
 	if err != nil {
@@ -66,7 +67,38 @@ func applyHighEntropyHeuristic(binary structs.ELFBinary, results *structs.ELFHeu
 				heuristic.Triggered = true
 			}
 		}
-		return nil
+		return measureSegmentEntropy(file, elfFile, fileSize, heuristic)
+	}
+	return nil
+}
+
+// measureSegmentEntropy meet uitsluitend de bytes op disk van laadbare segmenten.
+// Geheugenruimte zonder bestandsbytes (Memsz > Filesz) telt niet mee.
+func measureSegmentEntropy(file *os.File, elfFile *elf.File, fileSize uint64, heuristic *structs.ELFHeuristicScore) error {
+	for i, segment := range elfFile.Progs {
+		if segment.Type != elf.PT_LOAD || segment.Filesz < minEntropySegmentSize {
+			continue
+		}
+		if segment.Off > fileSize || segment.Filesz > fileSize-segment.Off {
+			return fmt.Errorf("segment %d lies outside the file", i)
+		}
+
+		entropy, err := shannonEntropy(io.NewSectionReader(file, int64(segment.Off), int64(segment.Filesz)))
+		if err != nil {
+			return fmt.Errorf("segment %d: %w", i, err)
+		}
+
+		executable := segment.Flags&elf.PF_X != 0
+		heuristic.Evaluated = true
+		heuristic.Evidence = append(heuristic.Evidence,
+			fmt.Sprintf("segment %d (PT_LOAD): entropy=%.3f bits/byte, file size=%d bytes, executable=%t",
+				i, entropy, segment.Filesz, executable))
+		if entropy > heuristic.Score {
+			heuristic.Score = entropy
+		}
+		if entropy >= highEntropyThreshold {
+			heuristic.Triggered = true
+		}
 	}
 	return nil
 }
