@@ -25,3 +25,14 @@ Path received: ./samples
 
 If `-path` is missing, the program exits with a usage message.
 
+# Use of AI 
+AI is used for:
+- programming trivial logic, structure and calculations
+- bug fixing
+- refactoring
+
+A human is used for:
+- determining program architecture
+- determining what heuristics to use and how
+- determining the weights of heuristics
+- evaluations
