@@ -30,7 +30,7 @@ type ELFHeuristicResults struct {
 type ELFHeuristicScore struct {
 	ID        HeuristicID
 	Name      string
-	Score     float64
+	Value     float64
 	Unit      string
 	Evaluated bool
 	Triggered bool
@@ -54,7 +54,7 @@ func (heuristic ELFHeuristicScore) Print() {
 		return
 	}
 	fmt.Printf("    - [%s] %s: %.3f %s (triggered=%t)\n",
-		heuristic.ID, heuristic.Name, heuristic.Score, heuristic.Unit, heuristic.Triggered)
+		heuristic.ID, heuristic.Name, heuristic.Value, heuristic.Unit, heuristic.Triggered)
 	for _, evidence := range heuristic.Evidence {
 		fmt.Printf("        evidence: %s\n", evidence)
 	}

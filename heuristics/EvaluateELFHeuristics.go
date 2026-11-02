@@ -21,18 +21,18 @@ func applyDirectMeasurements(binary structs.ELFBinary, results *structs.ELFHeuri
 		heuristic := &results.Heuristics[i]
 		switch heuristic.ID {
 		case structs.HeuristicFewImports:
-			heuristic.Score = float64(len(binary.ImportedSymbols))
+			heuristic.Value = float64(len(binary.ImportedSymbols))
 			heuristic.Unit = "imported symbols"
 			heuristic.Evaluated = true
 			heuristic.Evidence = []string{"Raw import count; no suspiciousness threshold applied."}
 		case structs.HeuristicUnusualSectionCount:
-			heuristic.Score = float64(binary.SectionCount)
+			heuristic.Value = float64(binary.SectionCount)
 			heuristic.Unit = "sections"
 			heuristic.Evaluated = true
 			heuristic.Evidence = []string{"Raw section count; no architecture-specific baseline applied."}
 		case structs.HeuristicStrippedSymbols:
 			if binary.IsStripped {
-				heuristic.Score = 1
+				heuristic.Value = 1
 			}
 			heuristic.Unit = "boolean (1=stripped)"
 			heuristic.Evaluated = true

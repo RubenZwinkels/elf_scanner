@@ -41,7 +41,7 @@ func applySectionAndSegmentSizes(binary structs.ELFBinary, results *structs.ELFH
 			}
 		}
 
-		heuristic.Score = float64(largest)
+		heuristic.Value = float64(largest)
 		heuristic.Unit = "bytes (largest on-disk section or segment)"
 		heuristic.Evaluated = true
 		return

@@ -60,8 +60,8 @@ func applyHighEntropyHeuristic(binary structs.ELFBinary, results *structs.ELFHeu
 			heuristic.Evidence = append(heuristic.Evidence,
 				fmt.Sprintf("section %q: entropy=%.3f bits/byte, size=%d bytes, executable=%t",
 					section.Name, entropy, section.Size, executable))
-			if entropy > heuristic.Score {
-				heuristic.Score = entropy
+			if entropy > heuristic.Value {
+				heuristic.Value = entropy
 			}
 			if entropy >= highEntropyThreshold {
 				heuristic.Triggered = true
@@ -93,8 +93,8 @@ func measureSegmentEntropy(file *os.File, elfFile *elf.File, fileSize uint64, he
 		heuristic.Evidence = append(heuristic.Evidence,
 			fmt.Sprintf("segment %d (PT_LOAD): entropy=%.3f bits/byte, file size=%d bytes, executable=%t",
 				i, entropy, segment.Filesz, executable))
-		if entropy > heuristic.Score {
-			heuristic.Score = entropy
+		if entropy > heuristic.Value {
+			heuristic.Value = entropy
 		}
 		if entropy >= highEntropyThreshold {
 			heuristic.Triggered = true
