@@ -1,6 +1,6 @@
 package structs
 
-import "fmt"
+import "rzwinkels/elf_scanner/logger"
 
 // ELFBinary houdt de verzamelde info bij van één ELF-bestand.
 type ELFBinary struct {
@@ -81,79 +81,79 @@ type ELFSymbol struct {
 }
 
 // Print toont één ELF-bestand op een leesbare manier.
-func (binary ELFBinary) Print() {
-	fmt.Print("===================================================================================")
-	fmt.Printf("File: %s\n", binary.Name)
-	fmt.Printf("  Path: %s\n", binary.Path)
-	fmt.Printf("  Size: %d bytes\n", binary.Size)
-	fmt.Printf("  SHA256: %s\n", binary.SHA256)
-	fmt.Printf("  Mode: %s\n", binary.FileMode)
-	fmt.Printf("  Modified: %s\n", binary.ModifiedAt)
+func (binary ELFBinary) Print(log *logger.Logger) {
+	log.Print("===================================================================================")
+	log.Printf("File: %s\n", binary.Name)
+	log.Printf("  Path: %s\n", binary.Path)
+	log.Printf("  Size: %d bytes\n", binary.Size)
+	log.Printf("  SHA256: %s\n", binary.SHA256)
+	log.Printf("  Mode: %s\n", binary.FileMode)
+	log.Printf("  Modified: %s\n", binary.ModifiedAt)
 
-	fmt.Println("  ELF header:")
-	fmt.Printf("    Class: %s\n", binary.Class)
-	fmt.Printf("    Endianness: %s\n", binary.Endianness)
-	fmt.Printf("    Version: %s\n", binary.Version)
-	fmt.Printf("    OS ABI: %s\n", binary.OSABI)
-	fmt.Printf("    ABI version: %d\n", binary.ABIVersion)
-	fmt.Printf("    Type: %s\n", binary.Type)
-	fmt.Printf("    Architecture: %s\n", binary.Architecture)
-	fmt.Printf("    Entry point: 0x%x\n", binary.EntryPoint)
-	fmt.Printf("    Stripped: %t\n", binary.IsStripped)
+	log.Println("  ELF header:")
+	log.Printf("    Class: %s\n", binary.Class)
+	log.Printf("    Endianness: %s\n", binary.Endianness)
+	log.Printf("    Version: %s\n", binary.Version)
+	log.Printf("    OS ABI: %s\n", binary.OSABI)
+	log.Printf("    ABI version: %d\n", binary.ABIVersion)
+	log.Printf("    Type: %s\n", binary.Type)
+	log.Printf("    Architecture: %s\n", binary.Architecture)
+	log.Printf("    Entry point: 0x%x\n", binary.EntryPoint)
+	log.Printf("    Stripped: %t\n", binary.IsStripped)
 
-	fmt.Println("  Counts:")
-	fmt.Printf("    Sections: %d\n", binary.SectionCount)
-	fmt.Printf("    Segments: %d\n", binary.SegmentCount)
-	fmt.Printf("    Imported libraries: %d\n", len(binary.ImportedLibraries))
-	fmt.Printf("    Imported symbols: %d\n", len(binary.ImportedSymbols))
-	fmt.Printf("    Symbols: %d\n", len(binary.Symbols))
-	fmt.Printf("    Dynamic symbols: %d\n", len(binary.DynamicSymbols))
+	log.Println("  Counts:")
+	log.Printf("    Sections: %d\n", binary.SectionCount)
+	log.Printf("    Segments: %d\n", binary.SegmentCount)
+	log.Printf("    Imported libraries: %d\n", len(binary.ImportedLibraries))
+	log.Printf("    Imported symbols: %d\n", len(binary.ImportedSymbols))
+	log.Printf("    Symbols: %d\n", len(binary.Symbols))
+	log.Printf("    Dynamic symbols: %d\n", len(binary.DynamicSymbols))
 
-	printStringList("  Imported libraries", binary.ImportedLibraries)
-	printImportedSymbols("  Imported symbols", binary.ImportedSymbols)
-	printSections("  Sections", binary.Sections)
-	printSegments("  Segments", binary.Segments)
-	printSymbols("  Symbols", binary.Symbols)
-	printSymbols("  Dynamic symbols", binary.DynamicSymbols)
+	printStringList(log, "  Imported libraries", binary.ImportedLibraries)
+	printImportedSymbols(log, "  Imported symbols", binary.ImportedSymbols)
+	printSections(log, "  Sections", binary.Sections)
+	printSegments(log, "  Segments", binary.Segments)
+	printSymbols(log, "  Symbols", binary.Symbols)
+	printSymbols(log, "  Dynamic symbols", binary.DynamicSymbols)
 }
 
-func printStringList(title string, values []string) {
+func printStringList(log *logger.Logger, title string, values []string) {
 	if len(values) == 0 {
 		return
 	}
 
-	fmt.Printf("%s:\n", title)
+	log.Printf("%s:\n", title)
 	for _, value := range values {
-		fmt.Printf("    - %s\n", value)
+		log.Printf("    - %s\n", value)
 	}
 }
 
-func printImportedSymbols(title string, symbols []ELFImportedSymbol) {
+func printImportedSymbols(log *logger.Logger, title string, symbols []ELFImportedSymbol) {
 	if len(symbols) == 0 {
 		return
 	}
 
-	fmt.Printf("%s:\n", title)
+	log.Printf("%s:\n", title)
 	for _, symbol := range symbols {
-		fmt.Printf("    - %s", symbol.Name)
+		log.Printf("    - %s", symbol.Name)
 		if symbol.Version != "" {
-			fmt.Printf(" version=%s", symbol.Version)
+			log.Printf(" version=%s", symbol.Version)
 		}
 		if symbol.Library != "" {
-			fmt.Printf(" library=%s", symbol.Library)
+			log.Printf(" library=%s", symbol.Library)
 		}
-		fmt.Println()
+		log.Println()
 	}
 }
 
-func printSections(title string, sections []ELFSection) {
+func printSections(log *logger.Logger, title string, sections []ELFSection) {
 	if len(sections) == 0 {
 		return
 	}
 
-	fmt.Printf("%s:\n", title)
+	log.Printf("%s:\n", title)
 	for _, section := range sections {
-		fmt.Printf("    - %s type=%s flags=%s addr=0x%x offset=%d size=%d link=%d info=%d align=%d entsize=%d\n",
+		log.Printf("    - %s type=%s flags=%s addr=0x%x offset=%d size=%d link=%d info=%d align=%d entsize=%d\n",
 			section.Name,
 			section.Type,
 			section.Flags,
@@ -168,14 +168,14 @@ func printSections(title string, sections []ELFSection) {
 	}
 }
 
-func printSegments(title string, segments []ELFSegment) {
+func printSegments(log *logger.Logger, title string, segments []ELFSegment) {
 	if len(segments) == 0 {
 		return
 	}
 
-	fmt.Printf("%s:\n", title)
+	log.Printf("%s:\n", title)
 	for _, segment := range segments {
-		fmt.Printf("    - type=%s flags=%s offset=%d vaddr=0x%x paddr=0x%x filesz=%d memsz=%d align=%d\n",
+		log.Printf("    - type=%s flags=%s offset=%d vaddr=0x%x paddr=0x%x filesz=%d memsz=%d align=%d\n",
 			segment.Type,
 			segment.Flags,
 			segment.Offset,
@@ -188,14 +188,14 @@ func printSegments(title string, segments []ELFSegment) {
 	}
 }
 
-func printSymbols(title string, symbols []ELFSymbol) {
+func printSymbols(log *logger.Logger, title string, symbols []ELFSymbol) {
 	if len(symbols) == 0 {
 		return
 	}
 
-	fmt.Printf("%s:\n", title)
+	log.Printf("%s:\n", title)
 	for _, symbol := range symbols {
-		fmt.Printf("    - %s section=%s value=0x%x size=%d info=%d other=%d",
+		log.Printf("    - %s section=%s value=0x%x size=%d info=%d other=%d",
 			symbol.Name,
 			symbol.Section,
 			symbol.Value,
@@ -204,11 +204,11 @@ func printSymbols(title string, symbols []ELFSymbol) {
 			symbol.Other,
 		)
 		if symbol.Version != "" {
-			fmt.Printf(" version=%s", symbol.Version)
+			log.Printf(" version=%s", symbol.Version)
 		}
 		if symbol.Library != "" {
-			fmt.Printf(" library=%s", symbol.Library)
+			log.Printf(" library=%s", symbol.Library)
 		}
-		fmt.Println()
+		log.Println()
 	}
 }

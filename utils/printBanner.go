@@ -1,6 +1,6 @@
 package utils
 
-import "fmt"
+import "rzwinkels/elf_scanner/logger"
 
 const startupBanner = `
   ______ _      ______    _____  _____          _   _ _   _ ______ _____
@@ -14,6 +14,6 @@ const startupBanner = `
  By Ruben Zwinkels
 `
 
-func PrintBanner() {
-	fmt.Print(startupBanner)
+func PrintBanner(log *logger.Logger) {
+	log.Print(startupBanner)
 }

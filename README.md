@@ -28,6 +28,15 @@ Example:
 go run . -path ./samples
 ```
 
+The minimum log level can be configured with `-log-level`:
+
+```bash
+go run . -path ./samples -log-level warning
+```
+
+Supported levels are `info`, `warning`, and `critical`. The default is `info`;
+messages at the selected level and above are written to stderr.
+
 Output:
 
 ```text

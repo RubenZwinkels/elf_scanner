@@ -1,6 +1,6 @@
 package structs
 
-import "fmt"
+import "rzwinkels/elf_scanner/logger"
 
 // HeuristicID is een vaste identifier voor een malware-heuristiek.
 type HeuristicID string
@@ -38,24 +38,24 @@ type ELFHeuristicScore struct {
 }
 
 // Print toont alle heuristieken zonder totaalscore of classificatie.
-func (results ELFHeuristicResults) Print() {
-	fmt.Println("  Heuristic results:")
-	fmt.Printf("    File: %s\n", results.Name)
-	fmt.Printf("    SHA256: %s\n", results.FileSHA256)
+func (results ELFHeuristicResults) Print(log *logger.Logger) {
+	log.Println("  Heuristic results:")
+	log.Printf("    File: %s\n", results.Name)
+	log.Printf("    SHA256: %s\n", results.FileSHA256)
 	for _, heuristic := range results.Heuristics {
-		heuristic.Print()
+		heuristic.Print(log)
 	}
 }
 
 // Print toont de ruwe score en onderbouwing van één heuristiek.
-func (heuristic ELFHeuristicScore) Print() {
+func (heuristic ELFHeuristicScore) Print(log *logger.Logger) {
 	if !heuristic.Evaluated {
-		fmt.Printf("    - [%s] %s: not evaluated\n", heuristic.ID, heuristic.Name)
+		log.Printf("    - [%s] %s: not evaluated\n", heuristic.ID, heuristic.Name)
 		return
 	}
-	fmt.Printf("    - [%s] %s: %.3f %s (triggered=%t)\n",
+	log.Printf("    - [%s] %s: %.3f %s (triggered=%t)\n",
 		heuristic.ID, heuristic.Name, heuristic.Value, heuristic.Unit, heuristic.Triggered)
 	for _, evidence := range heuristic.Evidence {
-		fmt.Printf("        evidence: %s\n", evidence)
+		log.Printf("        evidence: %s\n", evidence)
 	}
 }
