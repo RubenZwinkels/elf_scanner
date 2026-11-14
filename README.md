@@ -12,7 +12,7 @@ Scans ands scores ELF's on a posibility of being malware.
 - [ ] Missing or manipulated ELF header information
 - [ ] Architecture-specific outliers
 - [ ] Suspicious dynamic strings
-- [ ] Suspicious statically identified syscalls
+- [x] Suspicious statically identified syscalls
 
 # Usage
 

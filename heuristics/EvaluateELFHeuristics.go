@@ -9,7 +9,9 @@ func EvaluateELFHeuristics(binary structs.ELFBinary) (structs.ELFHeuristicResult
 	applyDirectMeasurements(binary, &results)
 	applySectionAndSegmentSizes(binary, &results)
 	applySuspiciousPermissions(binary, &results)
-
+	if err := applySuspiciousSyscalls(binary, &results); err != nil {
+		return results, err
+	}
 	if err := applyHighEntropyHeuristic(binary, &results); err != nil {
 		return results, err
 	}
