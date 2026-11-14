@@ -1,0 +1,41 @@
+{
+  "max_score": 100,
+  "heuristics": {
+    "high_entropy": {
+      "weight": 20,
+      "min": 0,
+      "max": 8
+    },
+    "few_imports": {
+      "weight": 10,
+      "min": 0,
+      "max": 20,
+      "invert": true
+    },
+    "unusual_section_count": {
+      "weight": 10,
+      "min": 0,
+      "max": 20
+    },
+    "unusual_section_size": {
+      "weight": 10,
+      "min": 0,
+      "max": 1000000
+    },
+    "suspicious_permissions": {
+      "weight": 15,
+      "min": 0,
+      "max": 1
+    },
+    "stripped_symbols": {
+      "weight": 5,
+      "min": 0,
+      "max": 1
+    },
+    "suspicious_syscalls": {
+      "weight": 30,
+      "min": 0,
+      "max": 10
+    }
+  }
+}
