@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"rzwinkels/elf_scanner/heuristics"
 	"rzwinkels/elf_scanner/logger"
@@ -11,6 +12,7 @@ import (
 )
 
 func main() {
+	startTime := time.Now()
 	inputPath := flag.String("path", "", "path to a file or directory")
 	logLevel := flag.String("log-level", "info", "minimum log level: info, warning, or critical")
 
@@ -47,6 +49,12 @@ func main() {
 			continue
 		}
 		results.Print(log)
+
+		duration := time.Since(startTime)
+		log.Info("Scanned %d ELFs in %s", len(binaries), duration)
+		if len(binaries) > 0 {
+			log.Info("Average time per ELF: %s", duration/time.Duration(len(binaries)))
+		}
 
 		log.Println()
 	}
